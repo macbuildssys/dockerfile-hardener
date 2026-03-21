@@ -15,9 +15,7 @@ def _all_findings(path: str):
     df = parse_dockerfile(path)
     return [f for r in ALL_RULES for f in r.check(df).findings]
 
-
-# ---------------------------------------------------------------------------- DH001 RootUser fix
-
+# DH001 RootUser
 
 def test_fix_adds_user_nonroot(tmp_path):
     p = tmp_path / "Dockerfile"
@@ -36,17 +34,16 @@ def test_fix_user_nonroot_before_cmd(tmp_path):
     findings = _all_findings(str(p))
     Fixer(str(p), backup=False).apply(findings)
     lines = p.read_text().splitlines()
-    user_idx = next(i for i, l in enumerate(lines) if "USER nonroot" in l)
-    # Match only unindented CMD instructions (not CMD inside a HEALTHCHECK template).
+    user_idx = next(i for i, line in enumerate(lines) if "USER nonroot" in line)
+
+    # Only match unindented CMD — not CMD inside a HEALTHCHECK template.
     cmd_idx = next(
-        i for i, l in enumerate(lines)
-        if l and l[0] not in (" ", "\t") and l.strip().startswith("CMD")
+        i for i, line in enumerate(lines)
+        if line and line[0] not in (" ", "\t") and line.strip().startswith("CMD")
     )
     assert user_idx < cmd_idx
 
-
-# ---------------------------------------------------------------------------- DH005 NoHealthcheck fix
-
+# DH005 NoHealthcheck
 
 def test_fix_adds_healthcheck(tmp_path):
     p = tmp_path / "Dockerfile"
@@ -68,11 +65,9 @@ def test_fix_healthcheck_not_added_twice(tmp_path):
     findings = _all_findings(str(p))
     applied = Fixer(str(p), backup=False).apply(findings)
     hc_applied = [a for a in applied if a.rule_id == "DH005"]
-    assert not hc_applied  # Should not apply again.
+    assert not hc_applied
 
-
-# ---------------------------------------------------------------------------- DH007 AddInstruction fix
-
+# DH007 AddInstruction
 
 def test_fix_add_to_copy(tmp_path):
     p = tmp_path / "Dockerfile"
@@ -83,9 +78,7 @@ def test_fix_add_to_copy(tmp_path):
     assert "COPY app.py" in content
     assert "ADD app.py" not in content
 
-
-# ---------------------------------------------------------------------------- DH010 FileOwnership fix
-
+#  DH010 FileOwnership
 
 def test_fix_adds_chown_to_copy(tmp_path):
     p = tmp_path / "Dockerfile"
@@ -101,9 +94,7 @@ def test_fix_adds_chown_to_copy(tmp_path):
     content = p.read_text()
     assert "--chown=" in content
 
-
-# ---------------------------------------------------------------------------- dry-run
-
+# dry-run
 
 def test_dry_run_does_not_modify_file(tmp_path):
     p = tmp_path / "Dockerfile"
@@ -119,11 +110,9 @@ def test_dry_run_returns_applied_list(tmp_path):
     p.write_text("FROM ubuntu:22.04\nCMD [\"bash\"]\n")
     findings = _all_findings(str(p))
     applied = Fixer(str(p), dry_run=True, backup=False).apply(findings)
-    assert applied  # Should describe what would be applied.
+    assert applied
 
-
-# ---------------------------------------------------------------------------- backup
-
+#  backup
 
 def test_backup_created_by_default(tmp_path):
     p = tmp_path / "Dockerfile"

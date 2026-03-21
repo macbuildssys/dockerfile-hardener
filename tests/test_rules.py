@@ -20,7 +20,6 @@ from dockerfile_hardener.rules.base import Severity
 
 # DH001 RootUser
 
-
 class TestRootUserRule:
     rule = RootUserRule()
 
@@ -94,9 +93,7 @@ class TestLatestTagRule:
 
     def test_passes_digest(self, parse_inline):
         df = parse_inline(
-            "FROM ubuntu@sha256:"
-	    "abc123def456abc123def456abc123def456"
-            "abc123def456abc123def456abc123\nCMD ['x']"
+            "FROM ubuntu@sha256:abc123def456abc123def456abc123def456abc123def456abc123def456abc123\nCMD ['x']"
         )
         result = self.rule.check(df)
         assert result.passed
