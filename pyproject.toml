@@ -56,11 +56,10 @@ target-version = ["py39"]
 line-length = 100
 select = ["E", "F", "W", "I"]
 
-[tool.ruff.lint.per-file-ignores]
-"dockerfile_hardener/reporter.py" = ["E501"]
-
 [tool.setuptools.package-data]
 "dockerfile_hardener" = ["py.typed"]
+
+[tool.ruff.lint.per-file-ignores]
 "dockerfile_hardener/reporter.py" = ["E501"]
 
 # pre-commit hook definition (used by .pre-commit-config.yaml)
