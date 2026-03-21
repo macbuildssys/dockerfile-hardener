@@ -27,7 +27,7 @@ class TestRootUserRule:
         df = parse_inline("FROM ubuntu:22.04\nCMD ['bash']")
         result = self.rule.check(df)
         assert not result.passed
-        
+
         assert any(
             "no USER" in f.message or "no user" in f.message.lower()
             for f in result.findings
@@ -97,7 +97,7 @@ class TestLatestTagRule:
 
     def test_passes_digest(self, parse_inline):
         df = parse_inline(
-            
+
             "FROM ubuntu@sha256:"
             "abc123def456abc123def456abc123def456"
             "abc123def456abc123def456abc123def456\nCMD ['x']"

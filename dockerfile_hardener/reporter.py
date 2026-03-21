@@ -502,7 +502,7 @@ def report_html(
                     f"<td><span class='line'>{line_str}</span></td>"
                     f"<td><span class='rule-id'>{f.rule_id}</span><br>"
                     f"<span style='color:var(--muted);font-size:11px'>{f.rule_name}</span></td>"
-                    
+
                     "<td><span class='badge "
                     f"{f.severity.html_class}'>{f.severity.value}</span></td>"
                     f"<td>{_escape(f.message)}{ctx_html}</td>"

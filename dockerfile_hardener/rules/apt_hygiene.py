@@ -187,7 +187,7 @@ class AptHygieneRule(BaseRule):
                 line_number=instr.line_number,
                 fix_description=(
                     "Combine update and install in a single RUN: "
-                    
+
                     "RUN apt-get update && apt-get install -y <packages> "
                     "&& rm -rf /var/lib/apt/lists/*"
                 ),
