@@ -18,8 +18,10 @@ FIXTURES_DIR = Path(__file__).parent / "fixtures"
 @pytest.fixture
 def fixture_path():
     """Return the path to a named fixture Dockerfile."""
+
     def _path(name: str) -> str:
         return str(FIXTURES_DIR / name)
+
     return _path
 
 

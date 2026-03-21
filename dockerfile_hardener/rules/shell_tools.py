@@ -51,16 +51,16 @@ _RISKY_PACKAGES: dict[str, str] = {
 
 # Install command patterns to detect package installs.
 _INSTALL_PATTERNS: List[Tuple[str, re.Pattern]] = [
-    ("apt-get",  re.compile(r"\bapt-get\s+install\b")),
-    ("apt",      re.compile(r"\bapt\s+install\b")),
-    ("apk",      re.compile(r"\bapk\s+add\b")),
-    ("yum",      re.compile(r"\byum\s+install\b")),
-    ("dnf",      re.compile(r"\bdnf\s+install\b")),
-    ("zypper",   re.compile(r"\bzypper\s+install\b")),
-    ("pip",      re.compile(r"\bpip(?:3)?\s+install\b")),
-    ("pip",      re.compile(r"\bpip(?:3)?\s+install\b")),
-    ("npm",      re.compile(r"\bnpm\s+install\b")),
-    ("brew",     re.compile(r"\bbrew\s+install\b")),
+    ("apt-get", re.compile(r"\bapt-get\s+install\b")),
+    ("apt", re.compile(r"\bapt\s+install\b")),
+    ("apk", re.compile(r"\bapk\s+add\b")),
+    ("yum", re.compile(r"\byum\s+install\b")),
+    ("dnf", re.compile(r"\bdnf\s+install\b")),
+    ("zypper", re.compile(r"\bzypper\s+install\b")),
+    ("pip", re.compile(r"\bpip(?:3)?\s+install\b")),
+    ("pip", re.compile(r"\bpip(?:3)?\s+install\b")),
+    ("npm", re.compile(r"\bnpm\s+install\b")),
+    ("brew", re.compile(r"\bbrew\s+install\b")),
 ]
 
 # Tokenise a package install command value into individual package names.
@@ -87,10 +87,33 @@ def _extract_packages(run_value: str) -> List[str]:
         if any(c in tok for c in ("=", ">", "<", "/")):
             continue
         if lower in (
-            "install", "apt", "apt-get", "apk", "add", "yum", "dnf",
-            "zypper", "pip", "pip3", "npm", "brew", "run", "update",
-            "upgrade", "y", "yes", "no", "rm", "rf", "var", "lib",
-            "lists", "cache", "clean", "autoclean", "autoremove",
+            "install",
+            "apt",
+            "apt-get",
+            "apk",
+            "add",
+            "yum",
+            "dnf",
+            "zypper",
+            "pip",
+            "pip3",
+            "npm",
+            "brew",
+            "run",
+            "update",
+            "upgrade",
+            "y",
+            "yes",
+            "no",
+            "rm",
+            "rf",
+            "var",
+            "lib",
+            "lists",
+            "cache",
+            "clean",
+            "autoclean",
+            "autoremove",
         ):
             continue
         packages.append(lower)
@@ -123,18 +146,13 @@ class ShellToolsRule(BaseRule):
                 continue
 
             packages = _extract_packages(value_lower)
-            risky_found = {
-                pkg: _RISKY_PACKAGES[pkg]
-                for pkg in packages
-                if pkg in _RISKY_PACKAGES
-            }
+            risky_found = {pkg: _RISKY_PACKAGES[pkg] for pkg in packages if pkg in _RISKY_PACKAGES}
 
             for pkg, reason in risky_found.items():
                 findings.append(
                     self._finding(
                         message=(
-                            f'Package "{pkg}" is installed in the final stage. '
-                            f"Risk: {reason}."
+                            f'Package "{pkg}" is installed in the final stage. ' f"Risk: {reason}."
                         ),
                         line_number=instr.line_number,
                         fix_description=(

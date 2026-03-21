@@ -20,6 +20,7 @@ from dockerfile_hardener.rules.base import Severity
 
 # DH001 RootUser
 
+
 class TestRootUserRule:
     rule = RootUserRule()
 
@@ -29,8 +30,7 @@ class TestRootUserRule:
         assert not result.passed
 
         assert any(
-            "no USER" in f.message or "no user" in f.message.lower()
-            for f in result.findings
+            "no USER" in f.message or "no user" in f.message.lower() for f in result.findings
         )
 
     def test_flags_explicit_root(self, parse_inline):
@@ -75,7 +75,9 @@ class TestRootUserRule:
     def test_severity_is_critical(self):
         assert self.rule.SEVERITY == Severity.CRITICAL
 
+
 # DH002 LatestTag
+
 
 class TestLatestTagRule:
     rule = LatestTagRule()
@@ -97,7 +99,6 @@ class TestLatestTagRule:
 
     def test_passes_digest(self, parse_inline):
         df = parse_inline(
-
             "FROM ubuntu@sha256:"
             "abc123def456abc123def456abc123def456"
             "abc123def456abc123def456abc123def456\nCMD ['x']"
@@ -129,7 +130,9 @@ class TestLatestTagRule:
     def test_severity_is_high(self):
         assert self.rule.SEVERITY == Severity.HIGH
 
+
 # DH003 ShellTools
+
 
 class TestShellToolsRule:
     rule = ShellToolsRule()
@@ -175,7 +178,9 @@ class TestShellToolsRule:
     def test_severity_is_high(self):
         assert self.rule.SEVERITY == Severity.HIGH
 
+
 # DH004 MultiStage
+
 
 class TestMultiStageRule:
     rule = MultiStageRule()
@@ -215,7 +220,9 @@ class TestMultiStageRule:
         result = self.rule.check(df)
         assert result.passed
 
+
 # DH005 NoHealthcheck
+
 
 class TestNoHealthcheckRule:
     rule = NoHealthcheckRule()
@@ -242,7 +249,9 @@ class TestNoHealthcheckRule:
     def test_severity_is_low(self):
         assert self.rule.SEVERITY == Severity.LOW
 
+
 # DH006 SecretsInEnv
+
 
 class TestSecretsInEnvRule:
     rule = SecretsInEnvRule()
@@ -280,7 +289,9 @@ class TestSecretsInEnvRule:
     def test_severity_is_critical(self):
         assert self.rule.SEVERITY == Severity.CRITICAL
 
+
 # DH007 AddInstruction
+
 
 class TestAddInstructionRule:
     rule = AddInstructionRule()
@@ -316,19 +327,20 @@ class TestAddInstructionRule:
         fixable = [f for f in result.findings if f.fixable]
         assert fixable
 
+
 # DH008 AptHygiene
+
 
 class TestAptHygieneRule:
     rule = AptHygieneRule()
 
     def test_flags_missing_cache_cleanup(self, parse_inline):
-        df = parse_inline(
-            "FROM ubuntu:22.04\nRUN apt-get install -y curl\nCMD ['x']"
-        )
+        df = parse_inline("FROM ubuntu:22.04\nRUN apt-get install -y curl\nCMD ['x']")
         result = self.rule.check(df)
         assert not result.passed
-        assert any("cache" in f.message.lower() or "lists" in f.message.lower()
-                   for f in result.findings)
+        assert any(
+            "cache" in f.message.lower() or "lists" in f.message.lower() for f in result.findings
+        )
 
     def test_flags_missing_no_install_recommends(self, parse_inline):
         df = parse_inline(
@@ -369,7 +381,9 @@ class TestAptHygieneRule:
         result = self.rule.check(df)
         assert result.passed
 
+
 # DH009 PrivilegedPort
+
 
 class TestPrivilegedPortRule:
     rule = PrivilegedPortRule()
@@ -405,7 +419,9 @@ class TestPrivilegedPortRule:
         result = self.rule.check(df)
         assert len(result.findings) == 2
 
+
 # DH010 FileOwnership
+
 
 class TestFileOwnershipRule:
     rule = FileOwnershipRule()
@@ -454,34 +470,40 @@ class TestFileOwnershipRule:
         result = self.rule.check(df)
         assert any(f.fixable for f in result.findings)
 
+
 # integration: full fixture scans
+
 
 class TestFixtureScan:
     def _run_all(self, parse_inline, content):
         from dockerfile_hardener.rules import ALL_RULES
+
         df = parse_inline(content)
         return [r.check(df) for r in ALL_RULES]
 
     def test_insecure_fixture_has_many_findings(self, fixture_path):
         from dockerfile_hardener.parser import parse_dockerfile
         from dockerfile_hardener.rules import ALL_RULES
+
         df = parse_dockerfile(fixture_path("Dockerfile.insecure"))
         results = [r.check(df) for r in ALL_RULES]
         all_findings = [f for r in results for f in r.findings]
-        assert len(all_findings) >= 8, (
-            f"Expected at least 8 findings from insecure fixture, got {len(all_findings)}"
-        )
+        assert (
+            len(all_findings) >= 8
+        ), f"Expected at least 8 findings from insecure fixture, got {len(all_findings)}"
 
     def test_secure_fixture_is_clean(self, fixture_path):
         from dockerfile_hardener.parser import parse_dockerfile
         from dockerfile_hardener.rules import ALL_RULES
+
         df = parse_dockerfile(fixture_path("Dockerfile.secure"))
         results = [r.check(df) for r in ALL_RULES]
         all_findings = [f for r in results for f in r.findings]
         critical_high = [
             f for f in all_findings if f.severity in (Severity.CRITICAL, Severity.HIGH)
         ]
-        assert not critical_high, (
-            "Secure fixture should have no CRITICAL/HIGH findings; got: "
-            + ", ".join(f"{f.rule_id}: {f.message}" for f in critical_high)
+        assert (
+            not critical_high
+        ), "Secure fixture should have no CRITICAL/HIGH findings; got: " + ", ".join(
+            f"{f.rule_id}: {f.message}" for f in critical_high
         )

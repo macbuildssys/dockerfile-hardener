@@ -44,9 +44,7 @@ class RootUserRule(BaseRule):
                 # Only flag the final stage to avoid noise from build stages.
                 if stage_idx == dockerfile.stage_count - 1:
                     # Find the line of FROM for context.
-                    from_instr = next(
-                        (i for i in stage_instrs if i.command == "FROM"), None
-                    )
+                    from_instr = next((i for i in stage_instrs if i.command == "FROM"), None)
                     line = from_instr.line_number if from_instr else None
                     findings.append(
                         self._finding(

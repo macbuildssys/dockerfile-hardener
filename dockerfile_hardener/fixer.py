@@ -74,6 +74,7 @@ class Fixer:
 
         return applied
 
+
 # patch registry
 
 _PATCH_REGISTRY: dict[str, callable] = {}
@@ -81,16 +82,20 @@ _PATCH_REGISTRY: dict[str, callable] = {}
 
 def _register(rule_id: str):
     """Decorator to register a patch function for a rule."""
+
     def decorator(fn):
         _PATCH_REGISTRY[rule_id] = fn
         return fn
+
     return decorator
 
 
 def _get_patch(rule_id: str):
     return _PATCH_REGISTRY.get(rule_id)
 
+
 # DH001: RootUser
+
 
 @_register("DH001")
 def _fix_root_user(lines: List[str], finding: Finding) -> Optional[AppliedFix]:
@@ -141,7 +146,9 @@ def _fix_root_user(lines: List[str], finding: Finding) -> Optional[AppliedFix]:
             after=insert_line,
         )
 
+
 #  DH005: NoHealthcheck
+
 
 @_register("DH005")
 def _fix_no_healthcheck(lines: List[str], finding: Finding) -> Optional[AppliedFix]:
@@ -189,7 +196,9 @@ def _fix_no_healthcheck(lines: List[str], finding: Finding) -> Optional[AppliedF
             after=healthcheck,
         )
 
+
 # DH007: AddInstruction (local file ADD to COPY)
+
 
 @_register("DH007")
 def _fix_add_instruction(lines: List[str], finding: Finding) -> Optional[AppliedFix]:
@@ -217,12 +226,14 @@ def _fix_add_instruction(lines: List[str], finding: Finding) -> Optional[Applied
         rule_id="DH007",
         rule_name="AddInstruction",
         line_number=finding.line_number,
-        description='Replaced ADD with COPY.',
+        description="Replaced ADD with COPY.",
         before=original.rstrip(),
         after=fixed.rstrip(),
     )
 
+
 #  DH008: AptHygiene — cache cleanup + --no-install-recommends
+
 
 @_register("DH008")
 def _fix_apt_hygiene(lines: List[str], finding: Finding) -> Optional[AppliedFix]:
@@ -246,15 +257,15 @@ def _fix_apt_hygiene(lines: List[str], finding: Finding) -> Optional[AppliedFix]
     modified_end = original_end
 
     # Fix 1: Add --no-install-recommends.
-    if "no-install-recommends" not in finding.message.lower() and \
-       "cache" not in finding.message.lower():
+    if (
+        "no-install-recommends" not in finding.message.lower()
+        and "cache" not in finding.message.lower()
+    ):
         return None  # Not a hygiene we handle here.
 
     if "no-install-recommends" in finding.message:
         install_re = re.compile(r"(apt-get\s+install)", re.IGNORECASE)
-        modified_end = install_re.sub(
-            r"\1 --no-install-recommends", modified_end, count=1
-        )
+        modified_end = install_re.sub(r"\1 --no-install-recommends", modified_end, count=1)
 
     # Fix 2: Append cache cleanup.
     if "cache" in finding.message or "lists" in finding.message:
@@ -262,9 +273,7 @@ def _fix_apt_hygiene(lines: List[str], finding: Finding) -> Optional[AppliedFix]
         if not end_stripped.endswith("\\"):
             modified_end = end_stripped + " \\\n    && rm -rf /var/lib/apt/lists/*\n"
         else:
-            modified_end = (
-                end_stripped + "\n    && rm -rf /var/lib/apt/lists/*\n"
-            )
+            modified_end = end_stripped + "\n    && rm -rf /var/lib/apt/lists/*\n"
 
     if modified_end == original_end:
         return None
@@ -279,7 +288,9 @@ def _fix_apt_hygiene(lines: List[str], finding: Finding) -> Optional[AppliedFix]
         after=modified_end.rstrip(),
     )
 
+
 #  DH010: FileOwnership
+
 
 @_register("DH010")
 def _fix_file_ownership(lines: List[str], finding: Finding) -> Optional[AppliedFix]:

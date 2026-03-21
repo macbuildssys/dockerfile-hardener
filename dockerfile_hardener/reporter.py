@@ -21,10 +21,12 @@ from dockerfile_hardener.rules.base import Finding, RuleResult, Severity
 
 # scoring
 
+
 def compute_score(findings: List[Finding]) -> int:
     """Return an integer score 0–100; higher is better."""
     deductions = sum(f.severity.score_deduction for f in findings)
     return max(0, 100 - deductions)
+
 
 def score_grade(score: int) -> str:
     if score >= 90:
@@ -36,6 +38,7 @@ def score_grade(score: int) -> str:
     elif score >= 40:
         return "D"
     return "F"
+
 
 def score_colour(score: int) -> str:
     """Rich colour name for the score."""
@@ -49,7 +52,9 @@ def score_colour(score: int) -> str:
         return "red"
     return "bold red"
 
+
 # table reporter
+
 
 def report_table(
     results: List[RuleResult],
@@ -97,8 +102,11 @@ def report_table(
         + "  ".join(
             f"[{sev.colour}]{sev.emoji} {sev.value}: {counts[sev]}[/{sev.colour}]"
             for sev in [
-                Severity.CRITICAL, Severity.HIGH, Severity.MEDIUM,
-                Severity.LOW, Severity.INFO,
+                Severity.CRITICAL,
+                Severity.HIGH,
+                Severity.MEDIUM,
+                Severity.LOW,
+                Severity.INFO,
             ]
             if counts[sev]
         )
@@ -142,7 +150,9 @@ def report_table(
 
     return 1 if all_findings else 0
 
+
 # JSON reporter
+
 
 def report_json(
     results: List[RuleResult],
@@ -160,8 +170,7 @@ def report_json(
         "score": score,
         "grade": score_grade(score),
         "summary": {
-            sev.value: sum(1 for f in all_findings if f.severity == sev)
-            for sev in Severity
+            sev.value: sum(1 for f in all_findings if f.severity == sev) for sev in Severity
         },
         "findings": [
             {
@@ -267,6 +276,7 @@ def report_sarif(
     json.dump(sarif, stream, indent=2)
     stream.write("\n")
     return 1 if all_findings else 0
+
 
 # HTML reporter
 
@@ -474,7 +484,7 @@ def report_html(
                     f'  <div class="card">'
                     f'<div class="count {sev.html_class}">{counts[sev]}</div>'
                     f'<div class="sev {sev.html_class}">{sev.value}</div>'
-                    f'</div>\n'
+                    f"</div>\n"
                 )
         cards_html += "</div>"
         pass_or_cards = cards_html
@@ -486,23 +496,18 @@ def report_html(
                 if f.severity != sev:
                     continue
                 line_str = str(f.line_number) if f.line_number else "—"
-                ctx_html = (
-                    f'<div class="context">{_escape(f.context)}</div>' if f.context else ""
-                )
+                ctx_html = f'<div class="context">{_escape(f.context)}</div>' if f.context else ""
                 fix_html = (
                     f'<div class="fix-desc">{_escape(f.fix_description)}</div>'
                     if f.fix_description
                     else ""
                 )
-                auto_html = (
-                    '<span class="fix-badge">auto-fix</span>' if f.fixable else ""
-                )
+                auto_html = '<span class="fix-badge">auto-fix</span>' if f.fixable else ""
                 rows += (
                     f"<tr>"
                     f"<td><span class='line'>{line_str}</span></td>"
                     f"<td><span class='rule-id'>{f.rule_id}</span><br>"
                     f"<span style='color:var(--muted);font-size:11px'>{f.rule_name}</span></td>"
-
                     "<td><span class='badge "
                     f"{f.severity.html_class}'>{f.severity.value}</span></td>"
                     f"<td>{_escape(f.message)}{ctx_html}</td>"

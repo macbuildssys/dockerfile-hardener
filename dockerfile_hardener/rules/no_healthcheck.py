@@ -42,9 +42,9 @@ class NoHealthcheckRule(BaseRule):
                     ),
                     line_number=last_instr.line_number if last_instr else None,
                     fix_description=(
-                        'Add a HEALTHCHECK, e.g.: '
-                        'HEALTHCHECK --interval=30s --timeout=5s --retries=3 '
-                        'CMD curl -f http://localhost:8080/health || exit 1'
+                        "Add a HEALTHCHECK, e.g.: "
+                        "HEALTHCHECK --interval=30s --timeout=5s --retries=3 "
+                        "CMD curl -f http://localhost:8080/health || exit 1"
                     ),
                     fixable=True,
                     context="",

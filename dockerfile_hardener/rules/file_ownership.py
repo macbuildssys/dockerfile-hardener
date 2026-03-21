@@ -47,14 +47,14 @@ class FileOwnershipRule(BaseRule):
                 continue
 
             copy_add = [
-                i for i in stage_instrs
-                if i.command in ("COPY", "ADD")
-                and i.line_number > last_user.line_number
+                i
+                for i in stage_instrs
+                if i.command in ("COPY", "ADD") and i.line_number > last_user.line_number
             ]
             copy_add_before = [
-                i for i in stage_instrs
-                if i.command in ("COPY", "ADD")
-                and i.line_number <= last_user.line_number
+                i
+                for i in stage_instrs
+                if i.command in ("COPY", "ADD") and i.line_number <= last_user.line_number
             ]
 
             for instr in copy_add + copy_add_before:

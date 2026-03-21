@@ -33,8 +33,8 @@ class AddInstructionRule(BaseRule):
     SEVERITY = Severity.MEDIUM
     TAGS = ["CIS-DI-0009", "Docker-Best-Practice", "Docker-Hardening"]
     DESCRIPTION = (
-        'Use COPY instead of ADD unless you specifically need URL fetching or tar auto-extraction. '
-        'ADD with a remote URL performs a network request at build time.'
+        "Use COPY instead of ADD unless you specifically need URL fetching or tar auto-extraction. "
+        "ADD with a remote URL performs a network request at build time."
     )
 
     def check(self, dockerfile: "ParsedDockerfile") -> RuleResult:

@@ -29,6 +29,7 @@ from dockerfile_hardener.rules.base import Finding, RuleResult, Severity
 
 # helpers
 
+
 def _gather_findings(dockerfile_path: str) -> tuple[list[RuleResult], list[Finding]]:
     """Parse the Dockerfile and run all rules. Returns (results, all_findings)."""
     parsed = parse_dockerfile(dockerfile_path)
@@ -44,7 +45,9 @@ def _severity_from_str(value: str) -> Severity:
         valid = ", ".join(s.value for s in Severity)
         raise click.BadParameter(f"Must be one of: {valid}")
 
+
 #  CLI root
+
 
 @click.group()
 @click.version_option(__version__, "--version", "-V", message="%(version)s")
@@ -61,39 +64,48 @@ def main():
       dockerfile-hardener rules
     """
 
+
 #  lint
+
 
 @main.command("lint")
 @click.argument("dockerfile", default="Dockerfile", metavar="<dockerfile>")
 @click.option(
-    "--format", "-f", "fmt",
+    "--format",
+    "-f",
+    "fmt",
     type=click.Choice(["table", "json", "sarif", "html"], case_sensitive=False),
     default="table",
     show_default=True,
     help="Output format.",
 )
 @click.option(
-    "--output", "-o", "output_path",
+    "--output",
+    "-o",
+    "output_path",
     type=click.Path(dir_okay=False, writable=True),
     default=None,
     help="Write output to FILE instead of stdout.",
 )
 @click.option(
-    "--fail-on", "-F",
+    "--fail-on",
+    "-F",
     default="LOW",
     show_default=True,
     metavar="SEVERITY",
     help="Exit 1 only if findings of this severity or higher are present. "
-         "Choices: CRITICAL HIGH MEDIUM LOW INFO",
+    "Choices: CRITICAL HIGH MEDIUM LOW INFO",
 )
 @click.option(
-    "--rule", "-r",
+    "--rule",
+    "-r",
     multiple=True,
     metavar="RULE_ID",
     help="Run only the specified rule(s), e.g. --rule DH001 --rule DH006",
 )
 @click.option(
-    "--ignore", "-i",
+    "--ignore",
+    "-i",
     multiple=True,
     metavar="RULE_ID",
     help="Skip the specified rule(s), e.g. --ignore DH005",
@@ -162,18 +174,18 @@ def lint_cmd(
     _sev_order = [Severity.INFO, Severity.LOW, Severity.MEDIUM, Severity.HIGH, Severity.CRITICAL]
     threshold_idx = _sev_order.index(fail_severity)
 
-    should_fail = any(
-        _sev_order.index(f.severity) >= threshold_idx
-        for f in all_findings
-    )
+    should_fail = any(_sev_order.index(f.severity) >= threshold_idx for f in all_findings)
     sys.exit(1 if should_fail else 0)
 
+
 #  fix
+
 
 @main.command("fix")
 @click.argument("dockerfile", default="Dockerfile", metavar="<dockerfile>")
 @click.option(
-    "--dry-run", "-n",
+    "--dry-run",
+    "-n",
     is_flag=True,
     default=False,
     help="Show what would be changed without writing to disk.",
@@ -185,7 +197,8 @@ def lint_cmd(
     help="Do not write a .bak file before modifying the Dockerfile.",
 )
 @click.option(
-    "--rule", "-r",
+    "--rule",
+    "-r",
     multiple=True,
     metavar="RULE_ID",
     help="Fix only the specified rule(s).",
@@ -241,11 +254,15 @@ def fix_cmd(dockerfile: str, dry_run: bool, no_backup: bool, rule: tuple):
             click.echo(f"\nBackup saved to: {dockerfile}.bak")
         click.echo(f"Wrote: {dockerfile}")
 
+
 #  rules
+
 
 @main.command("rules")
 @click.option(
-    "--format", "-f", "fmt",
+    "--format",
+    "-f",
+    "fmt",
     type=click.Choice(["table", "json"], case_sensitive=False),
     default="table",
     help="Output format.",
@@ -264,6 +281,7 @@ def rules_cmd(fmt: str):
             for r in ALL_RULES
         ]
         import json
+
         click.echo(json.dumps(data, indent=2))
         return
 
@@ -294,7 +312,9 @@ def rules_cmd(fmt: str):
 
     console.print(table)
 
+
 #  utils
+
 
 def _assert_file_exists(path: str):
     if not Path(path).exists():

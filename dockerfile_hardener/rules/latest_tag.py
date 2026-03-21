@@ -39,8 +39,7 @@ class LatestTagRule(BaseRule):
     SEVERITY = Severity.HIGH
     TAGS = ["CIS-DI-0006", "Docker-Hardening", "Supply-Chain"]
     DESCRIPTION = (
-        "FROM should pin an explicit image tag or digest. "
-        "Avoid :latest and untagged images."
+        "FROM should pin an explicit image tag or digest. " "Avoid :latest and untagged images."
     )
 
     def check(self, dockerfile: "ParsedDockerfile") -> RuleResult:
@@ -79,7 +78,7 @@ class LatestTagRule(BaseRule):
                         line_number=instr.line_number,
                         fix_description=(
                             f'Pin an explicit tag, e.g. "{image}:1.2.3", '
-                            f"or a digest: \"{image}@sha256:<hash>\"."
+                            f'or a digest: "{image}@sha256:<hash>".'
                         ),
                         fixable=False,
                         context=instr.value,

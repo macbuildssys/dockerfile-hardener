@@ -19,13 +19,25 @@ if TYPE_CHECKING:
 
 # Build-tool package names that indicate a compiled project.
 _BUILD_TOOLS: List[str] = [
-    "gcc", "g++", "clang", "make", "cmake", "ninja",
-    "rustc", "cargo",
-    "golang", "go",
-    "javac", "maven", "gradle",
-    "dotnet", "msbuild",
+    "gcc",
+    "g++",
+    "clang",
+    "make",
+    "cmake",
+    "ninja",
+    "rustc",
+    "cargo",
+    "golang",
+    "go",
+    "javac",
+    "maven",
+    "gradle",
+    "dotnet",
+    "msbuild",
     "build-essential",
-    "autoconf", "automake", "libtool",
+    "autoconf",
+    "automake",
+    "libtool",
 ]
 
 _BUILD_TOOL_RE = re.compile(

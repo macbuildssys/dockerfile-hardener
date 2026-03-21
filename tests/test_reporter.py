@@ -25,7 +25,9 @@ def _results_from_fixture(fixture_path, name):
     df = parse_dockerfile(fixture_path(name))
     return [r.check(df) for r in ALL_RULES]
 
+
 # scoring
+
 
 def test_compute_score_perfect():
     assert compute_score([]) == 100
@@ -33,8 +35,12 @@ def test_compute_score_perfect():
 
 def test_compute_score_deducts_critical():
     finding = Finding(
-        rule_id="DH001", rule_name="R", severity=Severity.CRITICAL,
-        message="m", line_number=1, fix_description=None,
+        rule_id="DH001",
+        rule_name="R",
+        severity=Severity.CRITICAL,
+        message="m",
+        line_number=1,
+        fix_description=None,
     )
     score = compute_score([finding])
     assert score == 100 - Severity.CRITICAL.score_deduction
@@ -43,12 +49,17 @@ def test_compute_score_deducts_critical():
 def test_compute_score_floors_at_zero():
     findings = [
         Finding(
-            rule_id="X", rule_name="R", severity=Severity.CRITICAL,
-            message="m", line_number=i, fix_description=None,
+            rule_id="X",
+            rule_name="R",
+            severity=Severity.CRITICAL,
+            message="m",
+            line_number=i,
+            fix_description=None,
         )
         for i in range(20)
     ]
     assert compute_score(findings) == 0
+
 
 def test_score_grade_bands():
     assert score_grade(100) == "A"
@@ -62,7 +73,9 @@ def test_score_grade_bands():
     assert score_grade(39) == "F"
     assert score_grade(0) == "F"
 
+
 # JSON reporter
+
 
 class TestJsonReporter:
     def test_valid_json_structure(self, fixture_path):
@@ -106,7 +119,9 @@ class TestJsonReporter:
         code = report_json(results, "Dockerfile", out=buf)
         assert code == 0
 
+
 # SARIF reporter
+
 
 class TestSarifReporter:
     def test_valid_sarif_schema(self, fixture_path):
@@ -125,9 +140,7 @@ class TestSarifReporter:
         data = json.loads(buf.getvalue())
         for result in data["runs"][0]["results"]:
             assert "locations" in result
-            assert result["locations"][0]["physicalLocation"][
-                "artifactLocation"
-            ]["uri"]
+            assert result["locations"][0]["physicalLocation"]["artifactLocation"]["uri"]
 
     def test_sarif_levels_map_correctly(self, fixture_path):
         results = _results_from_fixture(fixture_path, "Dockerfile.insecure")
@@ -137,7 +150,9 @@ class TestSarifReporter:
         levels = {r["level"] for r in data["runs"][0]["results"]}
         assert levels.issubset({"error", "warning", "note", "none"})
 
+
 # HTML reporter
+
 
 class TestHtmlReporter:
     def test_produces_html_output(self, fixture_path):
@@ -176,7 +191,9 @@ class TestHtmlReporter:
         content = (tmp_path / "report.html").read_text()
         assert "<!DOCTYPE html>" in content
 
+
 # Table reporter
+
 
 class TestTableReporter:
     def test_table_returns_exit_1_on_findings(self, fixture_path):

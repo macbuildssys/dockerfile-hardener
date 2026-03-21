@@ -24,8 +24,8 @@ if TYPE_CHECKING:
 # apt patterns
 
 _APT_INSTALL_RE = re.compile(r"\bapt-get\s+install\b", re.IGNORECASE)
-_APT_UPDATE_RE  = re.compile(r"\bapt-get\s+update\b",  re.IGNORECASE)
-_APT_CLEAN_RE   = re.compile(
+_APT_UPDATE_RE = re.compile(r"\bapt-get\s+update\b", re.IGNORECASE)
+_APT_CLEAN_RE = re.compile(
     r"rm\s+-rf\s+/var/lib/apt/lists|apt-get\s+clean|apt-get\s+autoclean",
     re.IGNORECASE,
 )
@@ -33,10 +33,10 @@ _APT_NO_RECOMMENDS_RE = re.compile(r"--no-install-recommends", re.IGNORECASE)
 
 # apk patterns
 
-_APK_ADD_RE      = re.compile(r"\bapk\s+add\b",   re.IGNORECASE)
-_APK_NO_CACHE_RE = re.compile(r"--no-cache\b",    re.IGNORECASE)
-_APK_VIRTUAL_RE  = re.compile(r"--virtual\b",     re.IGNORECASE)
-_APK_DEL_RE      = re.compile(r"\bapk\s+del\b",   re.IGNORECASE)
+_APK_ADD_RE = re.compile(r"\bapk\s+add\b", re.IGNORECASE)
+_APK_NO_CACHE_RE = re.compile(r"--no-cache\b", re.IGNORECASE)
+_APK_VIRTUAL_RE = re.compile(r"--virtual\b", re.IGNORECASE)
+_APK_DEL_RE = re.compile(r"\bapk\s+del\b", re.IGNORECASE)
 
 # version pinning
 
@@ -86,10 +86,7 @@ class AptHygieneRule(BaseRule):
                         "The /var/lib/apt/lists directory will bloat the image."
                     ),
                     line_number=instr.line_number,
-                    fix_description=(
-                        "Append to the same RUN: "
-                        "&& rm -rf /var/lib/apt/lists/*"
-                    ),
+                    fix_description=("Append to the same RUN: " "&& rm -rf /var/lib/apt/lists/*"),
                     fixable=True,
                     context=value[:120],
                     stage_index=instr.stage_index,
@@ -105,9 +102,7 @@ class AptHygieneRule(BaseRule):
                         "Recommended packages will be installed, increasing image size."
                     ),
                     line_number=instr.line_number,
-                    fix_description=(
-                        "Add --no-install-recommends to apt-get install."
-                    ),
+                    fix_description=("Add --no-install-recommends to apt-get install."),
                     fixable=True,
                     context=value[:120],
                     stage_index=instr.stage_index,
@@ -187,7 +182,6 @@ class AptHygieneRule(BaseRule):
                 line_number=instr.line_number,
                 fix_description=(
                     "Combine update and install in a single RUN: "
-
                     "RUN apt-get update && apt-get install -y <packages> "
                     "&& rm -rf /var/lib/apt/lists/*"
                 ),

@@ -17,13 +17,13 @@ from typing import List, Optional
 class Instruction:
     """Represents a single logical Dockerfile instruction."""
 
-    command: str                    # Uppercased keyword: FROM, RUN, ENV, COPY, etc.
-    value: str                      # Everything after the keyword (stripped)
-    line_number: int                # 1-indexed line of the instruction's start
-    stage_index: int                # 0-indexed stage (increments at each FROM)
-    stage_name: Optional[str]       # AS <name> value from FROM, or None
-    is_last_stage: bool = False     # True if this instruction belongs to the final stage
-    raw_value: str = ""             # Unmodified value before continuation join
+    command: str  # Uppercased keyword: FROM, RUN, ENV, COPY, etc.
+    value: str  # Everything after the keyword (stripped)
+    line_number: int  # 1-indexed line of the instruction's start
+    stage_index: int  # 0-indexed stage (increments at each FROM)
+    stage_name: Optional[str]  # AS <name> value from FROM, or None
+    is_last_stage: bool = False  # True if this instruction belongs to the final stage
+    raw_value: str = ""  # Unmodified value before continuation join
 
 
 @dataclass
@@ -54,9 +54,7 @@ class ParsedDockerfile:
 
     def has_command_in_stage(self, command: str, stage_index: int) -> bool:
         return any(
-            i.command == command.upper()
-            for i in self.instructions
-            if i.stage_index == stage_index
+            i.command == command.upper() for i in self.instructions if i.stage_index == stage_index
         )
 
     def stage_names(self) -> List[Optional[str]]:

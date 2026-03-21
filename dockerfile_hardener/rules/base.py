@@ -63,15 +63,15 @@ class Severity(str, Enum):
 class Finding:
     """A single violation found by a rule."""
 
-    rule_id: str                        # e.g. "DH001"
-    rule_name: str                      # e.g. "RootUser"
+    rule_id: str  # e.g. "DH001"
+    rule_name: str  # e.g. "RootUser"
     severity: Severity
-    message: str                        # Human-readable description
-    line_number: Optional[int]          # Line in the Dockerfile (1-indexed), or None
-    fix_description: Optional[str]      # Short description of the recommended fix
-    fixable: bool = False               # Whether --fix can auto-apply the fix
-    context: str = ""                   # The raw line from the Dockerfile for display
-    stage_index: Optional[int] = None   # Which stage the finding belongs to
+    message: str  # Human-readable description
+    line_number: Optional[int]  # Line in the Dockerfile (1-indexed), or None
+    fix_description: Optional[str]  # Short description of the recommended fix
+    fixable: bool = False  # Whether --fix can auto-apply the fix
+    context: str = ""  # The raw line from the Dockerfile for display
+    stage_index: Optional[int] = None  # Which stage the finding belongs to
     tags: List[str] = field(default_factory=list)  # e.g. ["CIS", "OWASP"]
 
 
