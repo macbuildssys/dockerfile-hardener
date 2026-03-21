@@ -1,13 +1,10 @@
 """
-DH010 - FileOwnership
+DH010: FileOwnership
 
 Files copied into a container default to root ownership. If the application
 runs as a non-root user (as required by DH001), files it needs to read or
 write should be owned by that user. Without --chown, the non-root process
 may be unable to access its own application files.
-
-This rule emits an INFO finding when COPY/ADD instructions do not specify
---chown and the Dockerfile also sets a non-root USER.
 """
 
 from __future__ import annotations
@@ -40,23 +37,20 @@ class FileOwnershipRule(BaseRule):
         for stage_idx in range(dockerfile.stage_count):
             stage_instrs = dockerfile.in_stage(stage_idx)
 
-            # Only flag if this stage sets a non-root user.
             user_instrs = [i for i in stage_instrs if i.command == "USER"]
             if not user_instrs:
-                continue  # No USER set — DH001 covers this.
+                continue
 
             last_user = user_instrs[-1]
             user_value = last_user.value.split()[0] if last_user.value.split() else ""
             if _ROOT_PATTERNS.match(user_value):
-                continue  # Running as root — file ownership is not the concern here.
+                continue
 
-            # Check COPY and ADD instructions after the USER instruction.
             copy_add = [
                 i for i in stage_instrs
                 if i.command in ("COPY", "ADD")
                 and i.line_number > last_user.line_number
             ]
-            # Also check instructions before USER (they default to root ownership).
             copy_add_before = [
                 i for i in stage_instrs
                 if i.command in ("COPY", "ADD")
@@ -68,13 +62,16 @@ class FileOwnershipRule(BaseRule):
                     findings.append(
                         self._finding(
                             message=(
-                                f'{instr.command} at line {instr.line_number} does not specify --chown. '
-                                f'Files will be owned by root, but the container runs as "{user_value}".'
+                                f"{instr.command} at line {instr.line_number} "
+                                "does not specify --chown. "
+                                "Files will be owned by root, "
+                                f'but the container runs as "{user_value}".'
                             ),
                             line_number=instr.line_number,
                             fix_description=(
-                                f'Add --chown={user_value}:{user_value} to the {instr.command} instruction: '
-                                f'{instr.command} --chown={user_value}:{user_value} ...'
+                                f"Add --chown={user_value}:{user_value} "
+                                f"to {instr.command}: "
+                                f"{instr.command} --chown={user_value}:{user_value} ..."
                             ),
                             fixable=True,
                             context=instr.value[:120],

@@ -82,7 +82,7 @@ def report_table(
     if not all_findings:
         console.print("\n[bold green]✔ No issues found. Dockerfile looks good![/bold green]\n")
         return 0
-    
+
     #  severity counts
     counts: Dict[Severity, int] = {s: 0 for s in Severity}
     for f in all_findings:

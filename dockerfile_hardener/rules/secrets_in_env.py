@@ -1,5 +1,5 @@
 """
-DH006 - SecretsInEnv
+DH006: SecretsInEnv
 
 Hardcoding secrets in ENV or ARG instructions embeds them in the image layers
 and in `docker history` output. Anyone with read access to the image can
@@ -10,7 +10,7 @@ in a later layer.
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Tuple
 
 from .base import BaseRule, Finding, RuleResult, Severity
 
@@ -57,6 +57,7 @@ def _secret_key_label(name: str) -> str | None:
         if frag in lower:
             return frag
     return None
+
 
 # Patterns that look like actual secret values (not empty or placeholder).
 _VALUE_IS_PLACEHOLDER = re.compile(
@@ -126,8 +127,8 @@ class SecretsInEnvRule(BaseRule):
                     findings.append(
                         self._finding(
                             message=(
-                                f'ENV variable "{name}" appears to contain a hardcoded secret '
-                                f'(matched pattern: {label}). '
+                                f'ENV variable "{name}" appears to contain a '
+                                f"hardcoded secret (matched pattern: {label}). "
                                 "Secrets embedded in ENV are stored in every image layer."
                             ),
                             line_number=instr.line_number,
@@ -142,7 +143,6 @@ class SecretsInEnvRule(BaseRule):
                         )
                     )
                 else:
-                    # Suspicious name but empty/placeholder value — warn at MEDIUM.
                     findings.append(
                         Finding(
                             rule_id=self.RULE_ID,
@@ -163,7 +163,7 @@ class SecretsInEnvRule(BaseRule):
                         )
                     )
 
-        # --- ARG ---
+        # ARG
         for instr in arg_instrs:
             name, default_val = _parse_arg(instr.value)
             label = _secret_key_label(name)
@@ -173,14 +173,16 @@ class SecretsInEnvRule(BaseRule):
                 findings.append(
                     self._finding(
                         message=(
-                            f'ARG "{name}" has a secret-like name with a non-empty default value. '
+                            f'ARG "{name}" has a secret-like name with a '
+                            "non-empty default value. "
                             "ARG defaults are stored in the image manifest."
                         ),
                         line_number=instr.line_number,
                         fix_description=(
                             f'Remove the default value: "ARG {name}". '
                             "Pass the value via --build-arg at build time "
-                            "(but avoid this for production secrets — use BuildKit secrets instead)."
+                            "(but avoid this for production secrets "
+                            "— use BuildKit secrets instead)."
                         ),
                         fixable=False,
                         context=f"ARG {name}=***",
