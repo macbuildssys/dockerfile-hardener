@@ -1,0 +1,130 @@
+name: dockerfile-hardener
+description: >
+  Lint Dockerfiles against Docker hardening best practices and optionally
+  fail CI on findings above a configurable severity threshold.
+
+author: macbuildssys
+
+branding:
+  icon: shield
+  color: blue
+
+inputs:
+  dockerfile:
+    description: Path to the Dockerfile to lint.
+    required: false
+    default: Dockerfile
+
+  format:
+    description: Output format. One of table, json, sarif, html.
+    required: false
+    default: sarif
+
+  output:
+    description: >
+      Path to write the output file. Required when format is sarif or html.
+      Defaults to dockerfile-hardener.sarif for sarif format.
+    required: false
+    default: dockerfile-hardener.sarif
+
+  fail-on:
+    description: >
+      Exit 1 (fail CI) if findings at or above this severity are present.
+      One of CRITICAL, HIGH, MEDIUM, LOW, INFO.
+    required: false
+    default: HIGH
+
+  ignore:
+    description: >
+      Comma-separated list of rule IDs to skip, e.g. "DH005,DH009".
+    required: false
+    default: ""
+
+  upload-sarif:
+    description: >
+      If true, upload the SARIF report to GitHub Code Scanning.
+      Requires the security-events write permission.
+    required: false
+    default: "true"
+
+outputs:
+  score:
+    description: Hardening score (0–100).
+  grade:
+    description: Grade letter (A–F).
+  findings:
+    description: Total number of findings.
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Install dockerfile-hardener
+      shell: bash
+      run: pip install dockerfile-hardener
+
+    - name: Build ignore flags
+      id: ignore-flags
+      shell: bash
+      run: |
+        IGNORE_STR="${{ inputs.ignore }}"
+        FLAGS=""
+        if [ -n "$IGNORE_STR" ]; then
+          IFS=',' read -ra RULES <<< "$IGNORE_STR"
+          for rule in "${RULES[@]}"; do
+            FLAGS="$FLAGS --ignore $rule"
+          done
+        fi
+        echo "flags=$FLAGS" >> "$GITHUB_OUTPUT"
+
+    - name: Run dockerfile-hardener
+      id: hardener
+      shell: bash
+      run: |
+        OUTPUT_FILE="${{ inputs.output }}"
+        [ -z "$OUTPUT_FILE" ] && OUTPUT_FILE="dockerfile-hardener.sarif"
+
+        set +e
+        dockerfile-hardener lint "${{ inputs.dockerfile }}" \
+          --format "${{ inputs.format }}" \
+          --output "$OUTPUT_FILE" \
+          --fail-on "${{ inputs.fail-on }}" \
+          ${{ steps.ignore-flags.outputs.flags }}
+        EXIT_CODE=$?
+        set -e
+
+        # Extract score and grade from a separate JSON run (always succeeds).
+        JSON_OUT=$(dockerfile-hardener lint "${{ inputs.dockerfile }}" --format json 2>/dev/null || echo '{}')
+        SCORE=$(echo "$JSON_OUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('score', 0))" 2>/dev/null || echo "0")
+        GRADE=$(echo "$JSON_OUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('grade', 'F'))" 2>/dev/null || echo "F")
+        FINDINGS=$(echo "$JSON_OUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d.get('findings', [])))" 2>/dev/null || echo "0")
+
+        echo "score=$SCORE"     >> "$GITHUB_OUTPUT"
+        echo "grade=$GRADE"     >> "$GITHUB_OUTPUT"
+        echo "findings=$FINDINGS" >> "$GITHUB_OUTPUT"
+        echo "output_file=$OUTPUT_FILE" >> "$GITHUB_OUTPUT"
+
+        echo "## 🐳 dockerfile-hardener" >> "$GITHUB_STEP_SUMMARY"
+        echo "" >> "$GITHUB_STEP_SUMMARY"
+        echo "| Metric | Value |" >> "$GITHUB_STEP_SUMMARY"
+        echo "|--------|-------|" >> "$GITHUB_STEP_SUMMARY"
+        echo "| Dockerfile | \`${{ inputs.dockerfile }}\` |" >> "$GITHUB_STEP_SUMMARY"
+        echo "| Score | $SCORE / 100 |" >> "$GITHUB_STEP_SUMMARY"
+        echo "| Grade | $GRADE |" >> "$GITHUB_STEP_SUMMARY"
+        echo "| Findings | $FINDINGS |" >> "$GITHUB_STEP_SUMMARY"
+
+        exit $EXIT_CODE
+
+    - name: Upload SARIF to GitHub Code Scanning
+      if: >
+        inputs.upload-sarif == 'true' &&
+        inputs.format == 'sarif' &&
+        always()
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ steps.hardener.outputs.output_file }}
+      continue-on-error: true

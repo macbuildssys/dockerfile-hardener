@@ -1,0 +1,25 @@
+# Intentionally insecure Dockerfile for testing dockerfile-hardener
+# Expected findings: DH001, DH002, DH003, DH006, DH007, DH008, DH009
+
+FROM ubuntu:latest
+
+ENV DATABASE_PASSWORD=supersecret123
+ENV API_KEY=abc123xyz
+ARG SECRET_TOKEN=my-secret-token
+
+RUN apt-get update
+RUN apt-get install -y curl wget bash gcc make vim git strace
+
+ADD app.tar.gz /app/
+ADD https://example.com/setup.sh /tmp/setup.sh
+
+RUN chmod +x /tmp/setup.sh && /tmp/setup.sh
+
+EXPOSE 80
+EXPOSE 443
+EXPOSE 22
+
+WORKDIR /app
+COPY . .
+
+CMD ["./app"]

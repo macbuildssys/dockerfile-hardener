@@ -1,0 +1,8 @@
+- id: dockerfile-hardener
+  name: dockerfile-hardener
+  description: Lint Dockerfiles against Docker hardening best practices
+  entry: dockerfile-hardener lint
+  language: python
+  files: "(^|/)Dockerfile(\\.[^/]+)?$"
+  types: [file]
+  args: ["--fail-on", "HIGH"]

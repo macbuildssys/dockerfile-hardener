@@ -1,0 +1,11 @@
+repos:
+  - repo: https://github.com/macbuildssys/dockerfile-hardener
+    rev: v1.0.0
+    hooks:
+      - id: dockerfile-hardener
+        name: dockerfile-hardener
+        description: Lint Dockerfiles against Docker hardening best practices
+        language: python
+        files: "(^|/)Dockerfile(\\.[^/]+)?$"
+        types: [file]
+        args: ["--fail-on", "HIGH"]

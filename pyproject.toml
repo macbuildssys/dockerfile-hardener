@@ -1,0 +1,69 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dockerfile-hardener"
+version = "1.0.0"
+description = "Lint and auto-fix Dockerfiles against Docker hardening best practices"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "macbuildssys", email = "hello@macbuildssys.dev"}]
+keywords = ["docker", "security", "devsecops", "hardening", "dockerfile", "lint"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Software Development :: Build Tools",
+]
+dependencies = [
+    "click>=8.1",
+    "rich>=13.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7",
+    "pytest-cov>=4",
+    "black>=23",
+    "ruff>=0.1",
+]
+
+[project.scripts]
+dockerfile-hardener = "dockerfile_hardener.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/macbuildssys/dockerfile-hardener"
+Repository = "https://github.com/macbuildssys/dockerfile-hardener"
+Issues = "https://github.com/macbuildssys/dockerfile-hardener/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["dockerfile_hardener*"]
+
+[tool.black]
+line-length = 100
+target-version = ["py39"]
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "W", "I"]
+
+[tool.setuptools.package-data]
+"dockerfile_hardener" = ["py.typed"]
+
+# pre-commit hook definition (used by .pre-commit-config.yaml)
+# See: https://pre-commit.com/#creating-new-hooks
+[tool.pre-commit-hooks]
+dockerfile-hardener = {entry = "dockerfile-hardener lint", language = "python", types = ["file"], files = "(^|/)Dockerfile(\\.[^/]+)?$"}
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
