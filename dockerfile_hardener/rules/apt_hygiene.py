@@ -1,5 +1,5 @@
 """
-DH008 - AptHygiene
+DH008: AptHygiene
 
 RUN instructions that install packages via apt-get or apk should:
   1. Clean the package manager cache in the same RUN layer.
@@ -21,7 +21,7 @@ from .base import BaseRule, Finding, RuleResult, Severity
 if TYPE_CHECKING:
     from dockerfile_hardener.parser import ParsedDockerfile
 
-# ----------------------------------------------------------------- apt patterns
+# apt patterns
 
 _APT_INSTALL_RE = re.compile(r"\bapt-get\s+install\b", re.IGNORECASE)
 _APT_UPDATE_RE  = re.compile(r"\bapt-get\s+update\b",  re.IGNORECASE)
@@ -31,19 +31,16 @@ _APT_CLEAN_RE   = re.compile(
 )
 _APT_NO_RECOMMENDS_RE = re.compile(r"--no-install-recommends", re.IGNORECASE)
 
-# ----------------------------------------------------------------- apk patterns
+# apk patterns
 
-_APK_ADD_RE     = re.compile(r"\bapk\s+add\b",      re.IGNORECASE)
-_APK_NO_CACHE_RE = re.compile(r"--no-cache\b",      re.IGNORECASE)
-_APK_VIRTUAL_RE = re.compile(r"--virtual\b",        re.IGNORECASE)
-_APK_DEL_RE     = re.compile(r"\bapk\s+del\b",      re.IGNORECASE)
+_APK_ADD_RE      = re.compile(r"\bapk\s+add\b",   re.IGNORECASE)
+_APK_NO_CACHE_RE = re.compile(r"--no-cache\b",    re.IGNORECASE)
+_APK_VIRTUAL_RE  = re.compile(r"--virtual\b",     re.IGNORECASE)
+_APK_DEL_RE      = re.compile(r"\bapk\s+del\b",   re.IGNORECASE)
 
-# ----------------------------------------------------------------- version pinning
+# version pinning
 
-# Package name without a version spec. Version pinning looks like:
-#   pkg=1.2.3  (apt)   pkg==1.2.3  (pip)   pkg-1.2.3  (apk)
-_APT_UNVERSIONED_RE = re.compile(r"\b([a-z][a-z0-9+.\-]*)(?<![=<>])\s+", re.IGNORECASE)
-_APT_VERSIONED_RE   = re.compile(r"[a-z][a-z0-9+.\-]*=\S+", re.IGNORECASE)
+_APT_VERSIONED_RE = re.compile(r"[a-z][a-z0-9+.\-]*=\S+", re.IGNORECASE)
 
 
 def _has_version_pin(package_list_text: str) -> bool:
@@ -73,7 +70,7 @@ class AptHygieneRule(BaseRule):
 
         return self._make_result(findings)
 
-    # ------------------------------------------------------------------ helpers
+    # helpers
 
     def _check_apt(self, instr, value: str) -> List[Finding]:
         findings: List[Finding] = []
@@ -147,7 +144,6 @@ class AptHygieneRule(BaseRule):
         if not _APK_ADD_RE.search(value):
             return findings
 
-        # 1. Missing --no-cache (preferred) or virtual+del pattern.
         has_no_cache = _APK_NO_CACHE_RE.search(value)
         has_virtual_del = _APK_VIRTUAL_RE.search(value) and _APK_DEL_RE.search(value)
 
@@ -174,15 +170,13 @@ class AptHygieneRule(BaseRule):
     def _check_update_without_install(self, instr, value: str) -> List[Finding]:
         """
         Detect `RUN apt-get update` in a layer that does NOT also contain
-        `apt-get install`. This leaves a stale update cache in the image;
-        any subsequent install in a later layer picks up the cached (and
-        potentially outdated) package index.
+        `apt-get install`. This leaves a stale update cache in the image.
         """
         findings: List[Finding] = []
         if not _APT_UPDATE_RE.search(value):
             return findings
         if _APT_INSTALL_RE.search(value):
-            return findings  # update + install in same layer is correct.
+            return findings
 
         findings.append(
             self._finding(
@@ -193,7 +187,9 @@ class AptHygieneRule(BaseRule):
                 line_number=instr.line_number,
                 fix_description=(
                     "Combine update and install in a single RUN: "
-                    "RUN apt-get update && apt-get install -y <packages> && rm -rf /var/lib/apt/lists/*"
+                    
+                    "RUN apt-get update && apt-get install -y <packages> "
+                    "&& rm -rf /var/lib/apt/lists/*"
                 ),
                 fixable=False,
                 context=value[:120],

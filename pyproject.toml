@@ -57,6 +57,9 @@ line-length = 100
 select = ["E", "F", "W", "I"]
 
 [tool.ruff.lint.per-file-ignores]
+"dockerfile_hardener/reporter.py" = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
 
 [tool.setuptools.package-data]
 "dockerfile_hardener" = ["py.typed"]

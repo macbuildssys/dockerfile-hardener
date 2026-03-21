@@ -96,7 +96,10 @@ def report_table(
         f"\n  Score: [{sc}]{score}/100 ({grade})[/{sc}]   "
         + "  ".join(
             f"[{sev.colour}]{sev.emoji} {sev.value}: {counts[sev]}[/{sev.colour}]"
-            for sev in [Severity.CRITICAL, Severity.HIGH, Severity.MEDIUM, Severity.LOW, Severity.INFO]
+            for sev in [
+                Severity.CRITICAL, Severity.HIGH, Severity.MEDIUM,
+                Severity.LOW, Severity.INFO,
+            ]
             if counts[sev]
         )
     )
@@ -499,7 +502,9 @@ def report_html(
                     f"<td><span class='line'>{line_str}</span></td>"
                     f"<td><span class='rule-id'>{f.rule_id}</span><br>"
                     f"<span style='color:var(--muted);font-size:11px'>{f.rule_name}</span></td>"
-                    f"<td><span class='badge {f.severity.html_class}'>{f.severity.value}</span></td>"
+                    
+                    "<td><span class='badge "
+                    f"{f.severity.html_class}'>{f.severity.value}</span></td>"
                     f"<td>{_escape(f.message)}{ctx_html}</td>"
                     f"<td>{fix_html}{auto_html}</td>"
                     f"</tr>\n"
