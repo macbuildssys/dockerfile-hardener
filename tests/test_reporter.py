@@ -7,8 +7,6 @@ from __future__ import annotations
 import io
 import json
 
-import pytest
-
 from dockerfile_hardener.parser import parse_dockerfile
 from dockerfile_hardener.reporter import (
     compute_score,
@@ -23,7 +21,6 @@ from dockerfile_hardener.rules.base import Finding, RuleResult, Severity
 
 
 def _results_from_fixture(fixture_path, name):
-    from dockerfile_hardener.parser import parse_dockerfile
     df = parse_dockerfile(fixture_path(name))
     return [r.check(df) for r in ALL_RULES]
 

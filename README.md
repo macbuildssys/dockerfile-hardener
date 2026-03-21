@@ -1,17 +1,8 @@
 # 🐳 dockerfile-hardener
 
-[![CI](https://github.com/macbuildssys/dockerfile-hardener/actions/workflows/ci.yml/badge.svg)](https://github.com/macbuildssys/dockerfile-hardener/actions)
-[![PyPI](https://img.shields.io/pypi/v/dockerfile-hardener)](https://pypi.org/project/dockerfile-hardener/)
-[![Python](https://img.shields.io/pypi/pyversions/dockerfile-hardener)](https://pypi.org/project/dockerfile-hardener/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-
 **Lint and auto-fix Dockerfiles against Docker hardening best practices.**
 
-`dockerfile-hardener` analyses Dockerfiles for security misconfigurations, applies
-auto-fixes where possible, and produces reports in four formats — including SARIF for
-native GitHub Code Scanning integration. It covers the hardening principles documented
-by Docker's own [Hardened Images](https://docs.docker.com/dhi/core-concepts/hardening/)
-specification.
+`dockerfile-hardener` analyses Dockerfiles for security misconfigurations, applies auto-fixes where possible, and produces reports in four formats, including SARIF for native GitHub Code Scanning integration. It covers the hardening principles documented by Docker's own [Hardened Images](https://docs.docker.com/dhi/core-concepts/hardening/) specification.
 
 Unlike Hadolint, Trivy, and Dockle which detect issues but do not remediate `dockerfile-hardener` can **automatically fix** a subset of findings in-place.
 
@@ -58,6 +49,7 @@ dockerfile-hardener lint Dockerfile --format sarif -o results.sarif
 
 # Auto-fix fixable findings (dry-run preview first)
 dockerfile-hardener fix Dockerfile --dry-run
+
 dockerfile-hardener fix Dockerfile
 
 # List all rules

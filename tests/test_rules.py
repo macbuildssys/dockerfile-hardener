@@ -4,8 +4,6 @@ Tests for all 10 dockerfile-hardener rules.
 
 from __future__ import annotations
 
-import pytest
-
 from dockerfile_hardener.rules import (
     AddInstructionRule,
     AptHygieneRule,
@@ -19,7 +17,6 @@ from dockerfile_hardener.rules import (
     ShellToolsRule,
 )
 from dockerfile_hardener.rules.base import Severity
-
 
 # ============================================================================ DH001 RootUser
 
@@ -499,6 +496,6 @@ class TestFixtureScan:
             f for f in all_findings if f.severity in (Severity.CRITICAL, Severity.HIGH)
         ]
         assert not critical_high, (
-            f"Secure fixture should have no CRITICAL/HIGH findings; got: "
+            "Secure fixture should have no CRITICAL/HIGH findings; got: "
             + ", ".join(f"{f.rule_id}: {f.message}" for f in critical_high)
         )

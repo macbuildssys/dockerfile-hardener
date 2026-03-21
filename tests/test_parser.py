@@ -5,8 +5,8 @@ Tests for dockerfile_hardener.parser
 from __future__ import annotations
 
 import pytest
-from dockerfile_hardener.parser import parse_dockerfile
 
+from dockerfile_hardener.parser import parse_dockerfile
 
 # ---------------------------------------------------------------------------- basic parsing
 

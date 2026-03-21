@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import json
 import sys
-from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import IO, Dict, List, Optional
@@ -66,10 +65,10 @@ def report_table(
     Print a Rich terminal table. Returns exit code (0 = pass, 1 = findings).
     """
     # Import Rich here so the rest of the module works without it.
-    from rich.console import Console
-    from rich.table import Table
     from rich import box
+    from rich.console import Console
     from rich.panel import Panel
+    from rich.table import Table
     from rich.text import Text
 
     console = Console(file=out or sys.stdout, highlight=False)

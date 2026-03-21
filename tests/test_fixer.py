@@ -4,15 +4,11 @@ Tests for dockerfile_hardener.fixer
 
 from __future__ import annotations
 
-import shutil
 from pathlib import Path
-
-import pytest
 
 from dockerfile_hardener.fixer import Fixer
 from dockerfile_hardener.parser import parse_dockerfile
 from dockerfile_hardener.rules import ALL_RULES
-from dockerfile_hardener.rules.base import Severity
 
 
 def _all_findings(path: str):

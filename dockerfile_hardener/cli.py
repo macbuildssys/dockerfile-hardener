@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 import click
 
@@ -19,12 +19,10 @@ from dockerfile_hardener import __version__
 from dockerfile_hardener.fixer import Fixer
 from dockerfile_hardener.parser import parse_dockerfile
 from dockerfile_hardener.reporter import (
-    compute_score,
     report_html,
     report_json,
     report_sarif,
     report_table,
-    score_grade,
 )
 from dockerfile_hardener.rules import ALL_RULES
 from dockerfile_hardener.rules.base import Finding, RuleResult, Severity
@@ -278,9 +276,9 @@ def rules_cmd(fmt: str):
         click.echo(json.dumps(data, indent=2))
         return
 
+    from rich import box
     from rich.console import Console
     from rich.table import Table
-    from rich import box
 
     console = Console()
     table = Table(
