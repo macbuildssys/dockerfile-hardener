@@ -27,8 +27,7 @@ from dockerfile_hardener.reporter import (
 from dockerfile_hardener.rules import ALL_RULES
 from dockerfile_hardener.rules.base import Finding, RuleResult, Severity
 
-# ---------------------------------------------------------------------------- helpers
-
+# helpers
 
 def _gather_findings(dockerfile_path: str) -> tuple[list[RuleResult], list[Finding]]:
     """Parse the Dockerfile and run all rules. Returns (results, all_findings)."""
@@ -45,9 +44,7 @@ def _severity_from_str(value: str) -> Severity:
         valid = ", ".join(s.value for s in Severity)
         raise click.BadParameter(f"Must be one of: {valid}")
 
-
-# ---------------------------------------------------------------------------- CLI root
-
+#  CLI root
 
 @click.group()
 @click.version_option(__version__, "--version", "-V", message="%(version)s")
@@ -64,9 +61,7 @@ def main():
       dockerfile-hardener rules
     """
 
-
-# ---------------------------------------------------------------------------- lint
-
+#  lint
 
 @main.command("lint")
 @click.argument("dockerfile", default="Dockerfile", metavar="<dockerfile>")
@@ -144,7 +139,7 @@ def lint_cmd(
     results = [r.check(parsed) for r in active_rules]
     all_findings = [f for r in results for f in r.findings]
 
-    # ------------------------------------------------------------------ output
+    # output
     out_stream = None
     if output_path and fmt != "html":
         out_stream = open(output_path, "w", encoding="utf-8")
@@ -163,7 +158,7 @@ def lint_cmd(
         out_stream.close()
         click.echo(f"Report written to: {output_path}", err=True)
 
-    # ------------------------------------------------------------------ exit code
+    #  exit code
     _sev_order = [Severity.INFO, Severity.LOW, Severity.MEDIUM, Severity.HIGH, Severity.CRITICAL]
     threshold_idx = _sev_order.index(fail_severity)
 
@@ -173,9 +168,7 @@ def lint_cmd(
     )
     sys.exit(1 if should_fail else 0)
 
-
-# ---------------------------------------------------------------------------- fix
-
+#  fix
 
 @main.command("fix")
 @click.argument("dockerfile", default="Dockerfile", metavar="<dockerfile>")
@@ -248,9 +241,7 @@ def fix_cmd(dockerfile: str, dry_run: bool, no_backup: bool, rule: tuple):
             click.echo(f"\nBackup saved to: {dockerfile}.bak")
         click.echo(f"Wrote: {dockerfile}")
 
-
-# ---------------------------------------------------------------------------- rules
-
+#  rules
 
 @main.command("rules")
 @click.option(
@@ -303,9 +294,7 @@ def rules_cmd(fmt: str):
 
     console.print(table)
 
-
-# ---------------------------------------------------------------------------- utils
-
+#  utils
 
 def _assert_file_exists(path: str):
     if not Path(path).exists():
