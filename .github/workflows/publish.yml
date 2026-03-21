@@ -3,9 +3,8 @@ name: Publish to PyPI
 on:
   push:
     tags:
-      - "v*.*.*"   # triggers on v1.0.0, v1.2.3, etc.
+      - "v*.*.*"
 
-  # Allow manual trigger from the Actions tab for testing.
   workflow_dispatch:
     inputs:
       dry_run:
@@ -14,7 +13,6 @@ on:
         default: "false"
 
 jobs:
-  # ------------------------------------------------------------------ run tests first
   test:
     name: Test before publish
     runs-on: ubuntu-latest
@@ -30,7 +28,6 @@ jobs:
           pip install -e ".[dev]"
           pytest -v
 
-  # ------------------------------------------------------------------ build sdist + wheel
   build:
     name: Build distribution
     needs: test
@@ -58,17 +55,16 @@ jobs:
           path: dist/
           retention-days: 7
 
-  # ------------------------------------------------------------------ publish to TestPyPI first
   publish-testpypi:
     name: Publish to TestPyPI
     needs: build
+    if: false
     runs-on: ubuntu-latest
     environment:
       name: testpypi
       url: https://test.pypi.org/project/dockerfile-hardener/
     permissions:
-      id-token: write   # required for trusted publishing
-
+      id-token: write
     steps:
       - name: Download dist
         uses: actions/download-artifact@v4
@@ -82,17 +78,15 @@ jobs:
         with:
           repository-url: https://test.pypi.org/legacy/
 
-  # ------------------------------------------------------------------ publish to PyPI
   publish-pypi:
     name: Publish to PyPI
-    needs: publish-testpypi
+    needs: build
     runs-on: ubuntu-latest
     environment:
       name: pypi
       url: https://pypi.org/project/dockerfile-hardener/
     permissions:
-      id-token: write   # required for trusted publishing
-
+      id-token: write
     steps:
       - name: Download dist
         uses: actions/download-artifact@v4
@@ -104,14 +98,12 @@ jobs:
         if: github.event.inputs.dry_run != 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
 
-  # ------------------------------------------------------------------ create GitHub release
   github-release:
     name: Create GitHub Release
     needs: publish-pypi
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
     steps:
       - uses: actions/checkout@v4
         with:
@@ -127,7 +119,6 @@ jobs:
         id: changelog
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          # Extract the section for this version from CHANGELOG.md
           awk "/^## \[$VERSION\]/{found=1; next} /^## \[/{if(found) exit} found{print}" \
             CHANGELOG.md > release_notes.txt
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
