@@ -74,8 +74,7 @@ class Fixer:
 
         return applied
 
-
-# ---------------------------------------------------------------------------- patch registry
+# patch registry
 
 _PATCH_REGISTRY: dict[str, callable] = {}
 
@@ -91,8 +90,7 @@ def _register(rule_id: str):
 def _get_patch(rule_id: str):
     return _PATCH_REGISTRY.get(rule_id)
 
-
-# ---------------------------------------------------------------------------- DH001: RootUser
+# DH001: RootUser
 
 @_register("DH001")
 def _fix_root_user(lines: List[str], finding: Finding) -> Optional[AppliedFix]:
@@ -143,8 +141,7 @@ def _fix_root_user(lines: List[str], finding: Finding) -> Optional[AppliedFix]:
             after=insert_line,
         )
 
-
-# ---------------------------------------------------------------------------- DH005: NoHealthcheck
+#  DH005: NoHealthcheck
 
 @_register("DH005")
 def _fix_no_healthcheck(lines: List[str], finding: Finding) -> Optional[AppliedFix]:
@@ -192,8 +189,7 @@ def _fix_no_healthcheck(lines: List[str], finding: Finding) -> Optional[AppliedF
             after=healthcheck,
         )
 
-
-# ---------------------------------------------------------------------------- DH007: AddInstruction (local file ADD → COPY)
+# DH007: AddInstruction (local file ADD to COPY)
 
 @_register("DH007")
 def _fix_add_instruction(lines: List[str], finding: Finding) -> Optional[AppliedFix]:
@@ -226,8 +222,7 @@ def _fix_add_instruction(lines: List[str], finding: Finding) -> Optional[Applied
         after=fixed.rstrip(),
     )
 
-
-# ---------------------------------------------------------------------------- DH008: AptHygiene — cache cleanup + --no-install-recommends
+#  DH008: AptHygiene — cache cleanup + --no-install-recommends
 
 @_register("DH008")
 def _fix_apt_hygiene(lines: List[str], finding: Finding) -> Optional[AppliedFix]:
@@ -284,8 +279,7 @@ def _fix_apt_hygiene(lines: List[str], finding: Finding) -> Optional[AppliedFix]
         after=modified_end.rstrip(),
     )
 
-
-# ---------------------------------------------------------------------------- DH010: FileOwnership
+#  DH010: FileOwnership
 
 @_register("DH010")
 def _fix_file_ownership(lines: List[str], finding: Finding) -> Optional[AppliedFix]:

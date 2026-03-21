@@ -19,14 +19,12 @@ from typing import IO, Dict, List, Optional
 from dockerfile_hardener import __version__
 from dockerfile_hardener.rules.base import Finding, RuleResult, Severity
 
-# ---------------------------------------------------------------------------- scoring
-
+# scoring
 
 def compute_score(findings: List[Finding]) -> int:
     """Return an integer score 0–100; higher is better."""
     deductions = sum(f.severity.score_deduction for f in findings)
     return max(0, 100 - deductions)
-
 
 def score_grade(score: int) -> str:
     if score >= 90:
@@ -38,7 +36,6 @@ def score_grade(score: int) -> str:
     elif score >= 40:
         return "D"
     return "F"
-
 
 def score_colour(score: int) -> str:
     """Rich colour name for the score."""
@@ -52,9 +49,7 @@ def score_colour(score: int) -> str:
         return "red"
     return "bold red"
 
-
-# ---------------------------------------------------------------------------- table reporter
-
+# table reporter
 
 def report_table(
     results: List[RuleResult],
@@ -74,7 +69,7 @@ def report_table(
     console = Console(file=out or sys.stdout, highlight=False)
     all_findings: List[Finding] = [f for r in results for f in r.findings]
 
-    # ------------------------------------------------------------------ header
+    #  header
     console.print()
     console.print(
         Panel(
@@ -87,8 +82,8 @@ def report_table(
     if not all_findings:
         console.print("\n[bold green]✔ No issues found. Dockerfile looks good![/bold green]\n")
         return 0
-
-    # ------------------------------------------------------------------ severity counts
+    
+    #  severity counts
     counts: Dict[Severity, int] = {s: 0 for s in Severity}
     for f in all_findings:
         counts[f.severity] += 1
@@ -107,7 +102,7 @@ def report_table(
     )
     console.print()
 
-    # ------------------------------------------------------------------ findings table
+    # findings table
     table = Table(
         box=box.ROUNDED,
         show_header=True,
@@ -144,9 +139,7 @@ def report_table(
 
     return 1 if all_findings else 0
 
-
-# ---------------------------------------------------------------------------- JSON reporter
-
+# JSON reporter
 
 def report_json(
     results: List[RuleResult],
@@ -190,7 +183,7 @@ def report_json(
     return 1 if all_findings else 0
 
 
-# ---------------------------------------------------------------------------- SARIF reporter
+# - SARIF reporter
 
 
 def report_sarif(
@@ -272,8 +265,7 @@ def report_sarif(
     stream.write("\n")
     return 1 if all_findings else 0
 
-
-# ---------------------------------------------------------------------------- HTML reporter
+# HTML reporter
 
 _HTML_TEMPLATE = """\
 <!DOCTYPE html>
@@ -464,7 +456,7 @@ def report_html(
     grade = score_grade(score)
     score_cls = f"score-{grade.lower()}"
 
-    # ------------------------------------------------------------------ cards
+    # cards
     if not all_findings:
         pass_or_cards = (
             '<div class="pass-banner">✔ No issues found — Dockerfile passes all checks.</div>'
@@ -484,7 +476,7 @@ def report_html(
         cards_html += "</div>"
         pass_or_cards = cards_html
 
-        # ------------------------------------------------------------------ table
+        #  table
         rows = ""
         for sev in [Severity.CRITICAL, Severity.HIGH, Severity.MEDIUM, Severity.LOW, Severity.INFO]:
             for f in all_findings:
