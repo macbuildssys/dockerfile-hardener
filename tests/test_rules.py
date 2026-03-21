@@ -18,7 +18,7 @@ from dockerfile_hardener.rules import (
 )
 from dockerfile_hardener.rules.base import Severity
 
-# ============================================================================ DH001 RootUser
+# DH001 RootUser
 
 
 class TestRootUserRule:
@@ -72,9 +72,7 @@ class TestRootUserRule:
     def test_severity_is_critical(self):
         assert self.rule.SEVERITY == Severity.CRITICAL
 
-
-# ============================================================================ DH002 LatestTag
-
+# DH002 LatestTag
 
 class TestLatestTagRule:
     rule = LatestTagRule()
@@ -96,7 +94,9 @@ class TestLatestTagRule:
 
     def test_passes_digest(self, parse_inline):
         df = parse_inline(
-            "FROM ubuntu@sha256:abc123def456abc123def456abc123def456abc123def456abc123def456abc123\nCMD ['x']"
+            "FROM ubuntu@sha256:"
+	    "abc123def456abc123def456abc123def456"
+            "abc123def456abc123def456abc123\nCMD ['x']"
         )
         result = self.rule.check(df)
         assert result.passed
@@ -125,9 +125,7 @@ class TestLatestTagRule:
     def test_severity_is_high(self):
         assert self.rule.SEVERITY == Severity.HIGH
 
-
-# ============================================================================ DH003 ShellTools
-
+# DH003 ShellTools
 
 class TestShellToolsRule:
     rule = ShellToolsRule()
@@ -173,9 +171,7 @@ class TestShellToolsRule:
     def test_severity_is_high(self):
         assert self.rule.SEVERITY == Severity.HIGH
 
-
-# ============================================================================ DH004 MultiStage
-
+# DH004 MultiStage
 
 class TestMultiStageRule:
     rule = MultiStageRule()
@@ -215,9 +211,7 @@ class TestMultiStageRule:
         result = self.rule.check(df)
         assert result.passed
 
-
-# ============================================================================ DH005 NoHealthcheck
-
+# DH005 NoHealthcheck
 
 class TestNoHealthcheckRule:
     rule = NoHealthcheckRule()
@@ -244,9 +238,7 @@ class TestNoHealthcheckRule:
     def test_severity_is_low(self):
         assert self.rule.SEVERITY == Severity.LOW
 
-
-# ============================================================================ DH006 SecretsInEnv
-
+# DH006 SecretsInEnv
 
 class TestSecretsInEnvRule:
     rule = SecretsInEnvRule()
@@ -284,9 +276,7 @@ class TestSecretsInEnvRule:
     def test_severity_is_critical(self):
         assert self.rule.SEVERITY == Severity.CRITICAL
 
-
-# ============================================================================ DH007 AddInstruction
-
+# DH007 AddInstruction
 
 class TestAddInstructionRule:
     rule = AddInstructionRule()
@@ -322,9 +312,7 @@ class TestAddInstructionRule:
         fixable = [f for f in result.findings if f.fixable]
         assert fixable
 
-
-# ============================================================================ DH008 AptHygiene
-
+# DH008 AptHygiene
 
 class TestAptHygieneRule:
     rule = AptHygieneRule()
@@ -377,9 +365,7 @@ class TestAptHygieneRule:
         result = self.rule.check(df)
         assert result.passed
 
-
-# ============================================================================ DH009 PrivilegedPort
-
+# DH009 PrivilegedPort
 
 class TestPrivilegedPortRule:
     rule = PrivilegedPortRule()
@@ -415,9 +401,7 @@ class TestPrivilegedPortRule:
         result = self.rule.check(df)
         assert len(result.findings) == 2
 
-
-# ============================================================================ DH010 FileOwnership
-
+# DH010 FileOwnership
 
 class TestFileOwnershipRule:
     rule = FileOwnershipRule()
@@ -466,9 +450,7 @@ class TestFileOwnershipRule:
         result = self.rule.check(df)
         assert any(f.fixable for f in result.findings)
 
-
-# ============================================================================ integration: full fixture scans
-
+# integration: full fixture scans
 
 class TestFixtureScan:
     def _run_all(self, parse_inline, content):
