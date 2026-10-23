@@ -8,13 +8,32 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: "Dry run — build but do not upload"
+        description: "Dry run: build but do not upload"
         required: false
         default: "false"
 
 jobs:
+  check:
+    name: Check if version is already on PyPI
+    runs-on: ubuntu-latest
+    outputs:
+      exists: ${{ steps.pypi.outputs.exists }}
+    steps:
+      - name: Look up version on PyPI
+        id: pypi
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" "https://pypi.org/pypi/dockerfile-hardener/$VERSION/json")
+          if [ "$CODE" = "200" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
   test:
     name: Test before publish
+    needs: check
+    if: needs.check.outputs.exists != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
